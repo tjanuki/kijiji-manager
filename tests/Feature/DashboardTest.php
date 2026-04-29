@@ -1,16 +1,25 @@
 <?php
 
+use App\Enums\ItemStatus;
+use App\Models\Item;
 use App\Models\User;
 
-test('guests are redirected to the login page', function () {
-    $response = $this->get(route('dashboard'));
-    $response->assertRedirect(route('login'));
-});
+use function Pest\Laravel\actingAs;
 
-test('authenticated users can visit the dashboard', function () {
+it('shows status counts and recent items for the auth user', function () {
     $user = User::factory()->create();
-    $this->actingAs($user);
 
-    $response = $this->get(route('dashboard'));
-    $response->assertOk();
+    Item::factory()->count(2)->create(['user_id' => $user->id, 'status' => ItemStatus::Draft]);
+    Item::factory()->count(1)->create(['user_id' => $user->id, 'status' => ItemStatus::Listed]);
+    Item::factory()->create();   // other user — must not be counted
+
+    actingAs($user)
+        ->get('/dashboard')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('dashboard')
+            ->where('counts.draft', 2)
+            ->where('counts.listed', 1)
+            ->has('recentItems', 3)
+        );
 });
