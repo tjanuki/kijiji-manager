@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ItemPhotoController;
+use App\Http\Controllers\ItemPhotoZipController;
 use App\Http\Controllers\ItemTransitionController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -19,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('items/{item}/photos', [ItemPhotoController::class, 'store'])->name('items.photos.store');
     Route::patch('items/{item}/photos/reorder', [ItemPhotoController::class, 'reorder'])->name('items.photos.reorder');
     Route::delete('items/{item}/photos/{photo}', [ItemPhotoController::class, 'destroy'])->name('items.photos.destroy');
+    Route::get('items/{item}/photos.zip', ItemPhotoZipController::class)->name('items.photos.zip');
 });
 
 require __DIR__.'/settings.php';

@@ -7,6 +7,7 @@ use App\Enums\ItemStatus;
 use App\Http\Requests\StoreItemRequest;
 use App\Http\Requests\UpdateItemRequest;
 use App\Models\Item;
+use App\Services\ListingDraftRenderer;
 
 class ItemController extends Controller
 {
@@ -53,14 +54,18 @@ class ItemController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Item $item)
+    public function show(Item $item, ListingDraftRenderer $renderer)
     {
         abort_unless($item->user_id === auth()->id(), 403);
 
-        $item->load('photos');
+        $item->load(['photos', 'user.settings']);
+
+        $listingDraft = $renderer->render($item);
+        $item->unsetRelation('user');
 
         return inertia('items/show', [
             'item' => $item,
+            'listing_draft' => $listingDraft,
         ]);
     }
 
