@@ -16,6 +16,9 @@ class SnippetsUpdateRequest extends FormRequest
         return [
             'pickup' => ['present', 'string', 'max:1000'],
             'payment' => ['present', 'string', 'max:1000'],
+            'reply_templates' => ['array', 'max:20'],
+            'reply_templates.*.label' => ['required_with:reply_templates.*', 'string', 'max:64'],
+            'reply_templates.*.body' => ['required_with:reply_templates.*', 'string', 'max:2000'],
         ];
     }
 
@@ -24,6 +27,7 @@ class SnippetsUpdateRequest extends FormRequest
         $this->merge([
             'pickup' => (string) $this->input('pickup', ''),
             'payment' => (string) $this->input('payment', ''),
+            'reply_templates' => $this->input('reply_templates', []),
         ]);
     }
 }

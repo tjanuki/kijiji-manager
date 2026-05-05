@@ -19,6 +19,7 @@ class SnippetsController extends Controller
             'snippets' => [
                 'pickup' => $stored['pickup'] ?? '',
                 'payment' => $stored['payment'] ?? '',
+                'reply_templates' => $stored['reply_templates'] ?? [],
             ],
         ]);
     }

@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import SnippetsController from '@/actions/App/Http/Controllers/Settings/SnippetsController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -7,9 +8,25 @@ import { Label } from '@/components/ui/label';
 import { edit as editProfile } from '@/routes/profile';
 import { edit } from '@/routes/snippets';
 
-type Snippets = { pickup: string; payment: string };
+type ReplyTemplate = { label: string; body: string };
+
+type Snippets = {
+    pickup: string;
+    payment: string;
+    reply_templates: ReplyTemplate[];
+};
 
 export default function SettingsSnippets({ snippets }: { snippets: Snippets }) {
+    const [replyTemplates, setReplyTemplates] = useState<ReplyTemplate[]>(
+        snippets.reply_templates ?? [],
+    );
+
+    useEffect(() => {
+        // intentional: re-sync local state when prop changes after a successful save
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setReplyTemplates(snippets.reply_templates ?? []);
+    }, [snippets.reply_templates]);
+
     return (
         <>
             <Head title="Listing snippets" />
@@ -67,6 +84,70 @@ export default function SettingsSnippets({ snippets }: { snippets: Snippets }) {
                                     message={errors.payment}
                                 />
                             </div>
+
+                            <section className="space-y-2 border-t pt-4">
+                                <div className="flex items-center justify-between">
+                                    <h2 className="font-medium">Reply templates</h2>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setReplyTemplates([
+                                                ...replyTemplates,
+                                                { label: '', body: '' },
+                                            ])
+                                        }
+                                        className="text-xs border rounded px-2 py-1"
+                                    >
+                                        Add template
+                                    </button>
+                                </div>
+
+                                {replyTemplates.map((tpl, i) => (
+                                    <div key={i} className="border rounded-lg p-3 space-y-2">
+                                        <input
+                                            type="text"
+                                            name={`reply_templates[${i}][label]`}
+                                            placeholder="Label"
+                                            value={tpl.label}
+                                            onChange={(e) => {
+                                                const next = [...replyTemplates];
+                                                next[i] = { ...next[i], label: e.target.value };
+                                                setReplyTemplates(next);
+                                            }}
+                                            className="w-full border rounded px-2 py-1 text-sm"
+                                        />
+                                        <InputError
+                                            message={errors[`reply_templates.${i}.label`]}
+                                        />
+                                        <textarea
+                                            name={`reply_templates[${i}][body]`}
+                                            rows={2}
+                                            placeholder="Body"
+                                            value={tpl.body}
+                                            onChange={(e) => {
+                                                const next = [...replyTemplates];
+                                                next[i] = { ...next[i], body: e.target.value };
+                                                setReplyTemplates(next);
+                                            }}
+                                            className="w-full border rounded px-2 py-1 text-sm"
+                                        />
+                                        <InputError
+                                            message={errors[`reply_templates.${i}.body`]}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setReplyTemplates(
+                                                    replyTemplates.filter((_, j) => j !== i),
+                                                )
+                                            }
+                                            className="text-xs text-rose-700 underline"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                ))}
+                            </section>
 
                             <div className="flex items-center gap-4">
                                 <Button

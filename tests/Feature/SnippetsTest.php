@@ -88,3 +88,27 @@ it('accepts blank snippets', function () {
     expect($fresh->snippets['pickup'])->toBe('');
     expect($fresh->snippets['payment'])->toBe('');
 });
+
+it('saves and returns reply templates', function () {
+    $user = User::factory()->create();
+
+    actingAs($user)
+        ->patch('/settings/snippets', [
+            'pickup' => 'Front door',
+            'payment' => 'E-transfer',
+            'reply_templates' => [
+                ['label' => 'Still available', 'body' => 'Yes — still available!'],
+                ['label' => 'Lowest', 'body' => 'Lowest is $X.'],
+            ],
+        ])
+        ->assertRedirect('/settings/snippets');
+
+    actingAs($user)
+        ->get('/settings/snippets')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('settings/snippets')
+            ->where('snippets.reply_templates.0.label', 'Still available')
+            ->where('snippets.reply_templates.1.body', 'Lowest is $X.')
+        );
+});

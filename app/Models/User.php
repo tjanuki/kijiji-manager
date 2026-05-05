@@ -43,6 +43,14 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasMany<Buyer, $this>
+     */
+    public function buyers(): HasMany
+    {
+        return $this->hasMany(Buyer::class);
+    }
+
+    /**
      * @return HasOne<UserSetting, $this>
      */
     public function settings(): HasOne

@@ -35,4 +35,9 @@ class Item extends Model
     {
         return $this->hasMany(ItemPhoto::class)->orderBy('position');
     }
+
+    public function inquiries(): HasMany
+    {
+        return $this->hasMany(Inquiry::class)->latest('received_at');
+    }
 }

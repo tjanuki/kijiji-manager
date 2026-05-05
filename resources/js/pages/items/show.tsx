@@ -1,5 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { InquiryForm } from '@/components/inquiry-form';
+import { InquiryTimeline } from '@/components/inquiry-timeline';
 import { StatusPill } from '@/components/status-pill';
 
 type Photo = { id: number; thumbnail_path: string | null; path: string };
@@ -13,6 +15,9 @@ type Item = {
     photos: Photo[];
 };
 type ListingDraft = { title: string; description: string };
+type Buyer = { id: number; display_name: string };
+type ReplyTemplate = { label: string; body: string };
+type Inquiry = Parameters<typeof InquiryTimeline>[0]['inquiries'][number];
 
 const COPIED_FEEDBACK_MS = 1500;
 
@@ -141,7 +146,19 @@ function TransitionControls({ item }: { item: Item }) {
     );
 }
 
-export default function ItemsShow({ item, listing_draft }: { item: Item; listing_draft: ListingDraft }) {
+export default function ItemsShow({
+    item,
+    listing_draft,
+    inquiries,
+    buyers,
+    reply_templates,
+}: {
+    item: Item;
+    listing_draft: ListingDraft;
+    inquiries: Inquiry[];
+    buyers: Buyer[];
+    reply_templates: ReplyTemplate[];
+}) {
     return (
         <>
             <Head title={item.title} />
@@ -222,6 +239,12 @@ export default function ItemsShow({ item, listing_draft }: { item: Item; listing
                 )}
 
                 <TransitionControls item={item} />
+
+                <section className="space-y-3">
+                    <h2 className="font-medium">Inquiries</h2>
+                    <InquiryForm itemId={item.id} buyers={buyers} />
+                    <InquiryTimeline inquiries={inquiries} replyTemplates={reply_templates} />
+                </section>
 
                 <Link
                     href={`/items/${item.id}/edit`}

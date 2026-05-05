@@ -58,14 +58,24 @@ class ItemController extends Controller
     {
         abort_unless($item->user_id === auth()->id(), 403);
 
-        $item->load(['photos', 'user.settings']);
+        $item->load(['photos', 'user.settings', 'inquiries.buyer']);
 
         $listingDraft = $renderer->render($item);
+        $snippets = $item->user?->settings?->snippets ?? [];
+        $replyTemplates = $snippets['reply_templates'] ?? [];
+
+        $inquiries = $item->inquiries;
+        $buyers = auth()->user()->buyers()->orderBy('display_name')->get(['id', 'display_name']);
+
         $item->unsetRelation('user');
+        $item->unsetRelation('inquiries');
 
         return inertia('items/show', [
             'item' => $item,
             'listing_draft' => $listingDraft,
+            'inquiries' => $inquiries,
+            'buyers' => $buyers,
+            'reply_templates' => $replyTemplates,
         ]);
     }
 
