@@ -56,3 +56,22 @@ it('requires kijiji_url when transitioning to listed', function () {
 
     app(ItemStatusManager::class)->transition($item, ItemStatus::Listed);
 })->throws(InvalidArgumentException::class, 'kijiji_url');
+
+it('does not require kijiji_url when transitioning reserved -> listed', function () {
+    $item = Item::factory()->listed()->create();
+    $originalListedAt = $item->listed_at;
+    $originalUrl = $item->kijiji_url;
+
+    // Move it into reserved manually for test purposes
+    $item->status = ItemStatus::Reserved;
+    $item->save();
+
+    app(ItemStatusManager::class)->transition($item, ItemStatus::Listed, [
+        'kijiji_url' => 'https://www.kijiji.ca/v-ignored',
+    ]);
+
+    $fresh = $item->fresh();
+    expect($fresh->status)->toBe(ItemStatus::Listed);
+    expect($fresh->kijiji_url)->toBe($originalUrl);
+    expect($fresh->listed_at->equalTo($originalListedAt))->toBeTrue();
+});

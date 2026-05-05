@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import { InquiryForm } from '@/components/inquiry-form';
 import { InquiryTimeline } from '@/components/inquiry-timeline';
@@ -43,6 +43,85 @@ function CopyButton({ text, label }: { text: string; label: string }) {
         >
             {state === 'copied' ? 'Copied!' : state === 'error' ? 'Copy failed' : `Copy ${label}`}
         </button>
+    );
+}
+
+function SchedulePickupForm({
+    itemId,
+    buyers,
+    askingPriceCents,
+}: {
+    itemId: number;
+    buyers: Buyer[];
+    askingPriceCents: number;
+}) {
+    const form = useForm<{
+        buyer_id: number | null;
+        notes: string;
+        agreed_price_cents: number | '';
+    }>({
+        buyer_id: buyers[0]?.id ?? null,
+        notes: '',
+        agreed_price_cents: askingPriceCents,
+    });
+
+    if (buyers.length === 0) {
+        return (
+            <div className="border rounded-lg p-4 text-sm text-zinc-600">
+                Add a buyer first to schedule a pickup.
+            </div>
+        );
+    }
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const price = form.data.agreed_price_cents === '' ? 0 : Number(form.data.agreed_price_cents);
+        router.post(
+            '/pickups',
+            {
+                buyer_id: form.data.buyer_id,
+                notes: form.data.notes || null,
+                items: [{ item_id: itemId, agreed_price_cents: price }],
+            },
+            { preserveScroll: true },
+        );
+    };
+
+    return (
+        <form onSubmit={submit} className="border rounded-lg p-4 space-y-3">
+            <h2 className="font-medium">Schedule pickup</h2>
+            <select
+                value={form.data.buyer_id ?? ''}
+                onChange={(e) => form.setData('buyer_id', Number(e.target.value))}
+                className="w-full border rounded px-2 py-1 text-sm"
+            >
+                {buyers.map((b) => (
+                    <option key={b.id} value={b.id}>{b.display_name}</option>
+                ))}
+            </select>
+            <input
+                type="number"
+                value={form.data.agreed_price_cents}
+                onChange={(e) =>
+                    form.setData(
+                        'agreed_price_cents',
+                        e.target.value === '' ? '' : Number(e.target.value),
+                    )
+                }
+                placeholder="Agreed price (cents)"
+                className="w-full border rounded px-2 py-1 text-sm"
+            />
+            <textarea
+                value={form.data.notes}
+                onChange={(e) => form.setData('notes', e.target.value)}
+                placeholder="When/where (e.g. Saturday around 2pm, front porch)"
+                rows={2}
+                className="w-full border rounded px-2 py-1 text-sm"
+            />
+            <button type="submit" className="bg-black text-white px-3 py-1.5 rounded text-sm">
+                Schedule
+            </button>
+        </form>
     );
 }
 
@@ -238,6 +317,9 @@ export default function ItemsShow({
                     </section>
                 )}
 
+                {item.status === 'listed' && (
+                    <SchedulePickupForm itemId={item.id} buyers={buyers} askingPriceCents={item.asking_price_cents} />
+                )}
                 <TransitionControls item={item} />
 
                 <section className="space-y-3">

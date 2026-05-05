@@ -7,6 +7,7 @@ use App\Enums\ItemStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -39,5 +40,12 @@ class Item extends Model
     public function inquiries(): HasMany
     {
         return $this->hasMany(Inquiry::class)->latest('received_at');
+    }
+
+    public function pickups(): BelongsToMany
+    {
+        return $this->belongsToMany(Pickup::class, 'pickup_items')
+            ->withPivot('agreed_price_cents')
+            ->withTimestamps();
     }
 }

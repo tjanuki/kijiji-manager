@@ -24,19 +24,21 @@ class ItemStatusManager
             );
         }
 
-        if ($to === ItemStatus::Listed && empty($context['kijiji_url'])) {
+        $isUnreserving = $from === ItemStatus::Reserved && $to === ItemStatus::Listed;
+
+        if ($to === ItemStatus::Listed && ! $isUnreserving && empty($context['kijiji_url'])) {
             throw new InvalidArgumentException('kijiji_url is required when transitioning to listed');
         }
 
         $item->status = $to;
 
-        match ($to) {
-            ItemStatus::Listed => $item->forceFill([
+        match (true) {
+            $to === ItemStatus::Listed && ! $isUnreserving => $item->forceFill([
                 'kijiji_url' => $context['kijiji_url'],
                 'listed_at' => now(),
             ]),
-            ItemStatus::Sold => $item->forceFill(['sold_at' => now()]),
-            ItemStatus::Withdrawn => $item->forceFill(['withdrawn_at' => now()]),
+            $to === ItemStatus::Sold => $item->forceFill(['sold_at' => now()]),
+            $to === ItemStatus::Withdrawn => $item->forceFill(['withdrawn_at' => now()]),
             default => null,
         };
 

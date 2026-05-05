@@ -7,6 +7,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ItemPhotoController;
 use App\Http\Controllers\ItemPhotoZipController;
 use App\Http\Controllers\ItemTransitionController;
+use App\Http\Controllers\PickupController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -30,6 +31,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('buyers', [BuyerController::class, 'store'])->name('buyers.store');
     Route::get('buyers/{buyer}', [BuyerController::class, 'show'])->name('buyers.show');
     Route::patch('buyers/{buyer}', [BuyerController::class, 'update'])->name('buyers.update');
+
+    Route::get('pickups', [PickupController::class, 'index'])->name('pickups.index');
+    Route::post('pickups', [PickupController::class, 'store'])->name('pickups.store');
+    Route::get('pickups/{pickup}', [PickupController::class, 'show'])->name('pickups.show');
+    Route::patch('pickups/{pickup}', [PickupController::class, 'update'])->name('pickups.update');
+    Route::post('pickups/{pickup}/complete', [PickupController::class, 'complete'])->name('pickups.complete');
+    Route::post('pickups/{pickup}/cancel', [PickupController::class, 'cancel'])->name('pickups.cancel');
 });
 
 require __DIR__.'/settings.php';
