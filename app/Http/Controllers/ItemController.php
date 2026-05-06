@@ -8,21 +8,38 @@ use App\Http\Requests\StoreItemRequest;
 use App\Http\Requests\UpdateItemRequest;
 use App\Models\Item;
 use App\Services\ListingDraftRenderer;
+use Illuminate\Http\Request;
 
 class ItemController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $items = auth()->user()->items()
-            ->with(['photos' => fn ($q) => $q->where('is_primary', true)])
-            ->latest()
-            ->get();
+        $user = $request->user();
+        $stale = $request->boolean('stale');
+
+        $query = $user->items()
+            ->with([
+                'photos' => fn ($q) => $q->where('is_primary', true),
+                'inquiries',
+            ])
+            ->latest();
+
+        if ($stale) {
+            $query->stale();
+        }
+
+        $items = $query->get()->each(function (Item $item) {
+            $item->setAttribute('is_stale', $item->isStale());
+            $item->unsetRelation('inquiries');
+        });
 
         return inertia('items/index', [
             'items' => $items,
+            'filters' => ['stale' => $stale],
+            'stale_count' => $user->items()->stale()->count(),
         ]);
     }
 

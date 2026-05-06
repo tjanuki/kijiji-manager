@@ -44,4 +44,13 @@ class ItemFactory extends Factory
             'listed_at' => now()->subDays(2),
         ]);
     }
+
+    public function stale(): self
+    {
+        return $this->state([
+            'status' => ItemStatus::Listed->value,
+            'kijiji_url' => 'https://www.kijiji.ca/v-'.fake()->uuid(),
+            'listed_at' => now()->subDays(Item::STALE_DAYS_LISTED + 1),
+        ]);
+    }
 }

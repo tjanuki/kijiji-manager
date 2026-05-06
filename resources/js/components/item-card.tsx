@@ -7,6 +7,7 @@ type Item = {
     title: string;
     status: 'draft' | 'ready' | 'listed' | 'reserved' | 'sold' | 'withdrawn';
     asking_price_cents: number;
+    is_stale?: boolean;
     photos?: Photo[];
 };
 
@@ -22,7 +23,14 @@ export function ItemCard({ item }: { item: Item }) {
             <div className="p-3 space-y-1">
                 <div className="flex items-start justify-between gap-2">
                     <p className="font-medium leading-tight line-clamp-2">{item.title}</p>
-                    <StatusPill status={item.status} />
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                        <StatusPill status={item.status} />
+                        {item.is_stale && (
+                            <span className="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-200 text-yellow-900">
+                                Stale
+                            </span>
+                        )}
+                    </div>
                 </div>
                 <p className="text-sm text-zinc-600">${(item.asking_price_cents / 100).toFixed(2)}</p>
             </div>
