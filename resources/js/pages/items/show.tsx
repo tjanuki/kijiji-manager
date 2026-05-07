@@ -91,6 +91,7 @@ function SchedulePickupForm({
         <form onSubmit={submit} className="border rounded-lg p-4 space-y-3">
             <h2 className="font-medium">Schedule pickup</h2>
             <select
+                name="buyer_id"
                 value={form.data.buyer_id ?? ''}
                 onChange={(e) => form.setData('buyer_id', Number(e.target.value))}
                 className="w-full border rounded px-2 py-1 text-sm"
@@ -112,6 +113,7 @@ function SchedulePickupForm({
                 className="w-full border rounded px-2 py-1 text-sm"
             />
             <textarea
+                name="notes"
                 value={form.data.notes}
                 onChange={(e) => form.setData('notes', e.target.value)}
                 placeholder="When/where (e.g. Saturday around 2pm, front porch)"
@@ -167,7 +169,7 @@ function TransitionControls({ item }: { item: Item }) {
                 }}
                 className="border rounded-lg p-4 space-y-3"
             >
-                <h2 className="font-medium">Mark as published</h2>
+                <h2 className="font-medium">Publish to Kijiji</h2>
                 <p className="text-sm text-zinc-600">
                     Paste the live Kijiji URL after posting the listing.
                 </p>

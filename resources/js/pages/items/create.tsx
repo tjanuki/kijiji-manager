@@ -29,6 +29,7 @@ export default function ItemsCreate({ conditions }: { conditions: Condition[] })
                 <label className="block">
                     <span className="text-sm">Title</span>
                     <input
+                        name="title"
                         className="mt-1 w-full border rounded px-3 py-2"
                         value={form.data.title}
                         onChange={(e) => form.setData('title', e.target.value)}
@@ -55,6 +56,7 @@ export default function ItemsCreate({ conditions }: { conditions: Condition[] })
                     <span className="text-sm">Asking price (cents)</span>
                     <input
                         type="number"
+                        name="asking_price_cents"
                         className="mt-1 w-full border rounded px-3 py-2"
                         value={form.data.asking_price_cents || ''}
                         onChange={(e) => form.setData('asking_price_cents', Number(e.target.value))}
