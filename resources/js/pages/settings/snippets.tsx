@@ -5,6 +5,7 @@ import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
 import { edit as editProfile } from '@/routes/profile';
 import { edit } from '@/routes/snippets';
 
@@ -154,6 +155,7 @@ export default function SettingsSnippets({ snippets }: { snippets: Snippets }) {
                                     disabled={processing}
                                     data-test="update-snippets-button"
                                 >
+                                    {processing && <Spinner className="mr-2 size-4" />}
                                     Save
                                 </Button>
                             </div>

@@ -217,9 +217,8 @@ it('creates an item in draft status', function () {
 
     actingAs($user)->get("/items/{$item->id}/edit")
         ->assertInertia(fn ($page) => $page
-            ->where('flash.toast.type', 'success')
-            ->where('flash.toast.message', 'Item created.')
-            ->etc()
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Item created.')
         );
 });
 ```
@@ -265,9 +264,8 @@ $response->assertRedirect("/items/{$item->id}/edit");
 
 actingAs($user)->get("/items/{$item->id}/edit")
     ->assertInertia(fn ($page) => $page
-        ->where('flash.toast.type', 'success')
-        ->where('flash.toast.message', 'Item updated.')
-        ->etc()
+        ->hasFlash('toast.type', 'success')
+        ->hasFlash('toast.message', 'Item updated.')
     );
 ```
 
@@ -301,9 +299,8 @@ $response->assertRedirect('/items');
 
 actingAs($user)->get('/items')
     ->assertInertia(fn ($page) => $page
-        ->where('flash.toast.type', 'success')
-        ->where('flash.toast.message', 'Item deleted.')
-        ->etc()
+        ->hasFlash('toast.type', 'success')
+        ->hasFlash('toast.message', 'Item deleted.')
     );
 ```
 
@@ -704,9 +701,8 @@ In `tests/Feature/ItemPhotoTest.php`, locate the test at line 15 (`it('stores a 
 ```php
 actingAs($user)->get("/items/{$item->id}/edit")
     ->assertInertia(fn ($page) => $page
-        ->where('flash.toast.type', 'success')
-        ->where('flash.toast.message', 'Photo uploaded.')
-        ->etc()
+        ->hasFlash('toast.type', 'success')
+        ->hasFlash('toast.message', 'Photo uploaded.')
     );
 ```
 
@@ -757,9 +753,8 @@ In `tests/Feature/ItemPhotoTest.php`, locate the test at line 58 (`it('deletes a
 ```php
 actingAs($user)->get("/items/{$item->id}/edit")
     ->assertInertia(fn ($page) => $page
-        ->where('flash.toast.type', 'success')
-        ->where('flash.toast.message', 'Photo removed.')
-        ->etc()
+        ->hasFlash('toast.type', 'success')
+        ->hasFlash('toast.message', 'Photo removed.')
     );
 ```
 
@@ -923,21 +918,14 @@ $response->assertRedirect();
 
 actingAs($user)->get("/items/{$item->id}/show")  // adjust path if different
     ->assertInertia(fn ($page) => $page
-        ->where('flash.toast.type', 'success')
-        ->where('flash.toast.message', 'Item marked as ready.')
-        ->etc()
+        ->hasFlash('toast.type', 'success')
+        ->hasFlash('toast.message', 'Item marked as ready.')
     );
 ```
 
 (Look at the test body to confirm the target state — the message must match the state the test transitions to. If the test transitions `draft -> ready`, use `'Item marked as ready.'`. If the test goes to `listed`, use `'Item marked as listed.'`.)
 
-If the redirect target isn't an inertia page (e.g., `back()` from a non-inertia request), instead assert via the manual session bag:
-
-```php
-expect(session('_inertia_flash.toast'))->toBe(['type' => 'success', 'message' => 'Item marked as ready.']);
-```
-
-The first form is preferred when feasible.
+`hasFlash` is the right assertion here even though `__invoke` returns `back()` — the next Inertia GET request following the redirect will see the flash payload.
 
 - [ ] **Step 2: Run the test to confirm it fails**
 
@@ -1126,9 +1114,8 @@ In `tests/Feature/InquiryStoreTest.php`, locate the test at line 11 (`it('create
 ```php
 actingAs($user)->get("/items/{$item->id}/show")  // or whatever route the user lands on
     ->assertInertia(fn ($page) => $page
-        ->where('flash.toast.type', 'success')
-        ->where('flash.toast.message', 'Inquiry logged.')
-        ->etc()
+        ->hasFlash('toast.type', 'success')
+        ->hasFlash('toast.message', 'Inquiry logged.')
     );
 ```
 
@@ -1462,9 +1449,8 @@ For `it('creates a buyer scoped to the current user', ...)` at line 27, append:
 ```php
 actingAs($user)->get("/buyers/{$buyer->id}")
     ->assertInertia(fn ($page) => $page
-        ->where('flash.toast.type', 'success')
-        ->where('flash.toast.message', 'Buyer added.')
-        ->etc()
+        ->hasFlash('toast.type', 'success')
+        ->hasFlash('toast.message', 'Buyer added.')
     );
 ```
 
@@ -1475,9 +1461,8 @@ For `it('updates a buyer', ...)` at line 63, append:
 ```php
 actingAs($user)->get("/buyers/{$buyer->id}")
     ->assertInertia(fn ($page) => $page
-        ->where('flash.toast.type', 'success')
-        ->where('flash.toast.message', 'Buyer updated.')
-        ->etc()
+        ->hasFlash('toast.type', 'success')
+        ->hasFlash('toast.message', 'Buyer updated.')
     );
 ```
 
@@ -1709,9 +1694,8 @@ In `tests/Feature/PickupCreateTest.php`, line 12 (`it('schedules a pickup and re
 ```php
 actingAs($user)->get("/pickups/{$pickup->id}")
     ->assertInertia(fn ($page) => $page
-        ->where('flash.toast.type', 'success')
-        ->where('flash.toast.message', 'Pickup scheduled.')
-        ->etc()
+        ->hasFlash('toast.type', 'success')
+        ->hasFlash('toast.message', 'Pickup scheduled.')
     );
 ```
 

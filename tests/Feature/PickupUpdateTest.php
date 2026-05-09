@@ -22,6 +22,12 @@ it('updates pickup notes and payment_method', function () {
     $fresh = $pickup->fresh();
     expect($fresh->notes)->toBe('Use side door');
     expect($fresh->payment_method)->toBe(PaymentMethod::ETransfer);
+
+    actingAs($user)->get("/pickups/{$pickup->id}")
+        ->assertInertia(fn ($page) => $page
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Pickup updated.')
+        );
 });
 
 it('forbids updating another user pickup', function () {

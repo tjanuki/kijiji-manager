@@ -1,4 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 
 type Item = { id: number; title: string };
 type Inquiry = {
@@ -41,43 +44,59 @@ export default function BuyersShow({ buyer, inquiries }: { buyer: Buyer; inquiri
                     className="border rounded-lg p-4 space-y-2"
                 >
                     <h2 className="font-medium text-sm">Edit details</h2>
-                    <input
-                        type="text"
-                        value={form.data.display_name}
-                        onChange={(e) => form.setData('display_name', e.target.value)}
-                        className="w-full border rounded px-2 py-1 text-sm"
-                    />
-                    <input
-                        type="text"
-                        placeholder="Phone"
-                        value={form.data.phone}
-                        onChange={(e) => form.setData('phone', e.target.value)}
-                        className="w-full border rounded px-2 py-1 text-sm"
-                    />
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        value={form.data.email}
-                        onChange={(e) => form.setData('email', e.target.value)}
-                        className="w-full border rounded px-2 py-1 text-sm"
-                    />
-                    <input
-                        type="text"
-                        placeholder="Kijiji handle"
-                        value={form.data.kijiji_handle}
-                        onChange={(e) => form.setData('kijiji_handle', e.target.value)}
-                        className="w-full border rounded px-2 py-1 text-sm"
-                    />
-                    <textarea
-                        rows={2}
-                        placeholder="Trust notes (private)"
-                        value={form.data.trust_notes}
-                        onChange={(e) => form.setData('trust_notes', e.target.value)}
-                        className="w-full border rounded px-2 py-1 text-sm"
-                    />
-                    <button type="submit" className="bg-black text-white px-3 py-1.5 rounded text-sm">
+                    <div>
+                        <input
+                            type="text"
+                            value={form.data.display_name}
+                            onChange={(e) => form.setData('display_name', e.target.value)}
+                            className="w-full border rounded px-2 py-1 text-sm"
+                        />
+                        <InputError message={form.errors.display_name} className="mt-1" />
+                    </div>
+                    <div>
+                        <input
+                            type="text"
+                            placeholder="Phone"
+                            value={form.data.phone}
+                            onChange={(e) => form.setData('phone', e.target.value)}
+                            className="w-full border rounded px-2 py-1 text-sm"
+                        />
+                        <InputError message={form.errors.phone} className="mt-1" />
+                    </div>
+                    <div>
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={form.data.email}
+                            onChange={(e) => form.setData('email', e.target.value)}
+                            className="w-full border rounded px-2 py-1 text-sm"
+                        />
+                        <InputError message={form.errors.email} className="mt-1" />
+                    </div>
+                    <div>
+                        <input
+                            type="text"
+                            placeholder="Kijiji handle"
+                            value={form.data.kijiji_handle}
+                            onChange={(e) => form.setData('kijiji_handle', e.target.value)}
+                            className="w-full border rounded px-2 py-1 text-sm"
+                        />
+                        <InputError message={form.errors.kijiji_handle} className="mt-1" />
+                    </div>
+                    <div>
+                        <textarea
+                            rows={2}
+                            placeholder="Trust notes (private)"
+                            value={form.data.trust_notes}
+                            onChange={(e) => form.setData('trust_notes', e.target.value)}
+                            className="w-full border rounded px-2 py-1 text-sm"
+                        />
+                        <InputError message={form.errors.trust_notes} className="mt-1" />
+                    </div>
+                    <Button type="submit" disabled={form.processing}>
+                        {form.processing && <Spinner className="mr-2 size-4" />}
                         Save
-                    </button>
+                    </Button>
                 </form>
 
                 <section>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreBuyerRequest;
 use App\Http\Requests\UpdateBuyerRequest;
 use App\Models\Buyer;
+use App\Support\Toast;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -27,6 +28,8 @@ class BuyerController extends Controller
     {
         $buyer = $request->user()->buyers()->create($request->validated());
 
+        Toast::success('Buyer added.');
+
         return redirect("/buyers/{$buyer->id}");
     }
 
@@ -45,6 +48,8 @@ class BuyerController extends Controller
     public function update(UpdateBuyerRequest $request, Buyer $buyer): RedirectResponse
     {
         $buyer->update($request->validated());
+
+        Toast::success('Buyer updated.');
 
         return back();
     }

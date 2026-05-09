@@ -1,5 +1,8 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 
 type Buyer = {
     id: number;
@@ -43,37 +46,50 @@ export default function BuyersIndex({ buyers }: { buyers: Buyer[] }) {
                         }}
                         className="border rounded-lg p-4 space-y-2"
                     >
-                        <input
-                            type="text"
-                            placeholder="Display name"
-                            value={form.data.display_name}
-                            onChange={(e) => form.setData('display_name', e.target.value)}
-                            className="w-full border rounded px-2 py-1 text-sm"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Phone"
-                            value={form.data.phone}
-                            onChange={(e) => form.setData('phone', e.target.value)}
-                            className="w-full border rounded px-2 py-1 text-sm"
-                        />
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            value={form.data.email}
-                            onChange={(e) => form.setData('email', e.target.value)}
-                            className="w-full border rounded px-2 py-1 text-sm"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Kijiji handle"
-                            value={form.data.kijiji_handle}
-                            onChange={(e) => form.setData('kijiji_handle', e.target.value)}
-                            className="w-full border rounded px-2 py-1 text-sm"
-                        />
-                        <button type="submit" className="bg-black text-white px-3 py-1.5 rounded text-sm">
+                        <div>
+                            <input
+                                type="text"
+                                placeholder="Display name"
+                                value={form.data.display_name}
+                                onChange={(e) => form.setData('display_name', e.target.value)}
+                                className="w-full border rounded px-2 py-1 text-sm"
+                            />
+                            <InputError message={form.errors.display_name} className="mt-1" />
+                        </div>
+                        <div>
+                            <input
+                                type="text"
+                                placeholder="Phone"
+                                value={form.data.phone}
+                                onChange={(e) => form.setData('phone', e.target.value)}
+                                className="w-full border rounded px-2 py-1 text-sm"
+                            />
+                            <InputError message={form.errors.phone} className="mt-1" />
+                        </div>
+                        <div>
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                value={form.data.email}
+                                onChange={(e) => form.setData('email', e.target.value)}
+                                className="w-full border rounded px-2 py-1 text-sm"
+                            />
+                            <InputError message={form.errors.email} className="mt-1" />
+                        </div>
+                        <div>
+                            <input
+                                type="text"
+                                placeholder="Kijiji handle"
+                                value={form.data.kijiji_handle}
+                                onChange={(e) => form.setData('kijiji_handle', e.target.value)}
+                                className="w-full border rounded px-2 py-1 text-sm"
+                            />
+                            <InputError message={form.errors.kijiji_handle} className="mt-1" />
+                        </div>
+                        <Button type="submit" disabled={form.processing}>
+                            {form.processing && <Spinner className="mr-2 size-4" />}
                             Save
-                        </button>
+                        </Button>
                     </form>
                 )}
 

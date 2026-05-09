@@ -59,7 +59,7 @@ it('walks the full sale lifecycle without JavaScript errors', function () {
 
     $page->select('buyer_id', (string) $buyer->id)
         ->fill('notes', 'Saturday around 2pm, front porch')
-        ->click('Schedule')
+        ->click('Schedule pickup')
         ->assertSee('Complete & mark sold')
         ->assertNoJavaScriptErrors();
 
@@ -79,4 +79,23 @@ it('walks the full sale lifecycle without JavaScript errors', function () {
     expect($pickup->fresh()->status->value)->toBe('completed');
     expect($pickup->fresh()->payment_status->value)->toBe('received');
     expect($item->fresh()->status->value)->toBe('sold');
+});
+
+it('shows a success toast after saving an item edit', function () {
+    $user = User::factory()->create();
+    $item = Item::factory()->create([
+        'user_id' => $user->id,
+        'title' => 'Original Title',
+    ]);
+
+    $this->actingAs($user);
+
+    $page = visit("/items/{$item->id}/edit");
+    $page->assertSee('Edit item')
+        ->fill('title', 'New Title')
+        ->click('Save')
+        ->assertSee('Item updated.')
+        ->assertNoJavaScriptErrors();
+
+    expect($item->fresh()->title)->toBe('New Title');
 });

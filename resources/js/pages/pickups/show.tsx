@@ -1,5 +1,8 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 
 type Buyer = { id: number; display_name: string };
 type PickupItem = {
@@ -37,6 +40,8 @@ export default function PickupsShow({
         payment_method: pickup.payment_method ?? '',
     });
     const [completePayment, setCompletePayment] = useState(payment_methods[0]?.value ?? 'cash');
+    const [completePending, setCompletePending] = useState(false);
+    const [cancelPending, setCancelPending] = useState<'cancelled' | 'no_show' | null>(null);
 
     const isOpen = pickup.status === 'scheduled';
 
@@ -78,26 +83,33 @@ export default function PickupsShow({
                     className="border rounded-lg p-4 space-y-2"
                 >
                     <h2 className="font-medium text-sm">Notes & payment method</h2>
-                    <textarea
-                        rows={3}
-                        value={editForm.data.notes}
-                        onChange={(e) => editForm.setData('notes', e.target.value)}
-                        placeholder="Pickup time, location, anything else"
-                        className="w-full border rounded px-2 py-1 text-sm"
-                    />
-                    <select
-                        value={editForm.data.payment_method}
-                        onChange={(e) => editForm.setData('payment_method', e.target.value)}
-                        className="w-full border rounded px-2 py-1 text-sm"
-                    >
-                        <option value="">Select payment method…</option>
-                        {payment_methods.map((m) => (
-                            <option key={m.value} value={m.value}>{m.label}</option>
-                        ))}
-                    </select>
-                    <button type="submit" className="bg-black text-white px-3 py-1.5 rounded text-sm">
+                    <div>
+                        <textarea
+                            rows={3}
+                            value={editForm.data.notes}
+                            onChange={(e) => editForm.setData('notes', e.target.value)}
+                            placeholder="Pickup time, location, anything else"
+                            className="w-full border rounded px-2 py-1 text-sm"
+                        />
+                        <InputError message={editForm.errors.notes} className="mt-1" />
+                    </div>
+                    <div>
+                        <select
+                            value={editForm.data.payment_method}
+                            onChange={(e) => editForm.setData('payment_method', e.target.value)}
+                            className="w-full border rounded px-2 py-1 text-sm"
+                        >
+                            <option value="">Select payment method…</option>
+                            {payment_methods.map((m) => (
+                                <option key={m.value} value={m.value}>{m.label}</option>
+                            ))}
+                        </select>
+                        <InputError message={editForm.errors.payment_method} className="mt-1" />
+                    </div>
+                    <Button type="submit" disabled={editForm.processing}>
+                        {editForm.processing && <Spinner className="mr-2 size-4" />}
                         Save
-                    </button>
+                    </Button>
                 </form>
 
                 {isOpen && (
@@ -116,19 +128,25 @@ export default function PickupsShow({
                                     <option key={m.value} value={m.value}>{m.label}</option>
                                 ))}
                             </select>
-                            <button
+                            <Button
                                 type="button"
                                 onClick={() => {
+                                    setCompletePending(true);
                                     router.post(
                                         `/pickups/${pickup.id}/complete`,
                                         { payment_method: completePayment },
-                                        { preserveScroll: true },
+                                        {
+                                            preserveScroll: true,
+                                            onFinish: () => setCompletePending(false),
+                                        },
                                     );
                                 }}
-                                className="bg-emerald-700 text-white px-3 py-1.5 rounded text-sm"
+                                disabled={completePending}
+                                className="bg-emerald-700 text-white"
                             >
+                                {completePending && <Spinner className="mr-2 size-4" />}
                                 Complete & mark sold
-                            </button>
+                            </Button>
                         </div>
                     </section>
                 )}
@@ -139,28 +157,40 @@ export default function PickupsShow({
                         <div className="flex gap-2">
                             <button
                                 type="button"
-                                onClick={() =>
+                                disabled={cancelPending !== null}
+                                onClick={() => {
+                                    setCancelPending('cancelled');
                                     router.post(
                                         `/pickups/${pickup.id}/cancel`,
                                         { to: 'cancelled' },
-                                        { preserveScroll: true },
-                                    )
-                                }
-                                className="text-sm border rounded px-3 py-1.5"
+                                        {
+                                            preserveScroll: true,
+                                            onFinish: () => setCancelPending(null),
+                                        },
+                                    );
+                                }}
+                                className="text-sm border rounded px-3 py-1.5 inline-flex items-center"
                             >
+                                {cancelPending === 'cancelled' ? <Spinner className="mr-2 size-4" /> : null}
                                 Cancel pickup
                             </button>
                             <button
                                 type="button"
-                                onClick={() =>
+                                disabled={cancelPending !== null}
+                                onClick={() => {
+                                    setCancelPending('no_show');
                                     router.post(
                                         `/pickups/${pickup.id}/cancel`,
                                         { to: 'no_show' },
-                                        { preserveScroll: true },
-                                    )
-                                }
-                                className="text-sm border rounded px-3 py-1.5"
+                                        {
+                                            preserveScroll: true,
+                                            onFinish: () => setCancelPending(null),
+                                        },
+                                    );
+                                }}
+                                className="text-sm border rounded px-3 py-1.5 inline-flex items-center"
                             >
+                                {cancelPending === 'no_show' ? <Spinner className="mr-2 size-4" /> : null}
                                 Mark no-show
                             </button>
                         </div>

@@ -8,6 +8,7 @@ use App\Http\Requests\StoreItemRequest;
 use App\Http\Requests\UpdateItemRequest;
 use App\Models\Item;
 use App\Services\ListingDraftRenderer;
+use App\Support\Toast;
 use Illuminate\Http\Request;
 
 class ItemController extends Controller
@@ -65,6 +66,8 @@ class ItemController extends Controller
             'status' => ItemStatus::Draft,
         ]);
 
+        Toast::success('Item created.');
+
         return redirect("/items/{$item->id}/edit");
     }
 
@@ -120,6 +123,8 @@ class ItemController extends Controller
 
         $item->update($request->validated());
 
+        Toast::success('Item updated.');
+
         return redirect("/items/{$item->id}/edit");
     }
 
@@ -131,6 +136,8 @@ class ItemController extends Controller
         abort_unless($item->user_id === auth()->id(), 403);
 
         $item->delete();
+
+        Toast::success('Item deleted.');
 
         return redirect('/items');
     }

@@ -9,6 +9,8 @@ use App\Models\Pickup;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
+use function Pest\Laravel\actingAs;
+
 it('schedules a pickup and reserves attached items', function () {
     $user = User::factory()->create();
     $buyer = Buyer::factory()->create(['user_id' => $user->id]);
@@ -31,6 +33,18 @@ it('schedules a pickup and reserves attached items', function () {
     expect($itemB->fresh()->status)->toBe(ItemStatus::Reserved);
     $pivot = $pickup->items->firstWhere('id', $itemA->id)->pivot;
     expect($pivot->agreed_price_cents)->toBe(2500);
+
+    $itemC = Item::factory()->listed()->create(['user_id' => $user->id]);
+    $response = actingAs($user)->post('/pickups', [
+        'buyer_id' => $buyer->id,
+        'items' => [['item_id' => $itemC->id, 'agreed_price_cents' => 1000]],
+    ]);
+    $createdPickup = Pickup::query()->latest('id')->first();
+    actingAs($user)->get("/pickups/{$createdPickup->id}")
+        ->assertInertia(fn ($page) => $page
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Pickup scheduled.')
+        );
 });
 
 it('rolls back when one of the items cannot transition', function () {

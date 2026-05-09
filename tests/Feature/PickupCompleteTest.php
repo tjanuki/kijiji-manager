@@ -36,6 +36,20 @@ it('completes a pickup, marks payment received, and sells all items', function (
     expect($itemA->fresh()->status)->toBe(ItemStatus::Sold);
     expect($itemA->fresh()->sold_at)->not->toBeNull();
     expect($itemB->fresh()->status)->toBe(ItemStatus::Sold);
+
+    $itemC = Item::factory()->listed()->create(['user_id' => $user->id]);
+    $secondPickup = app(SchedulePickup::class)->handle(
+        buyer: $buyer,
+        items: [['item_id' => $itemC->id, 'agreed_price_cents' => 500]],
+    );
+    \Pest\Laravel\actingAs($user)
+        ->post("/pickups/{$secondPickup->id}/complete", ['payment_method' => 'cash'])
+        ->assertRedirect();
+    \Pest\Laravel\actingAs($user)->get("/pickups/{$secondPickup->id}")
+        ->assertInertia(fn ($page) => $page
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Pickup marked complete.')
+        );
 });
 
 it('rejects completing a pickup that is not scheduled', function () {

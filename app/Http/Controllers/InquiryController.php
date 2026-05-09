@@ -7,6 +7,7 @@ use App\Http\Requests\StoreInquiryRequest;
 use App\Http\Requests\UpdateInquiryRequest;
 use App\Models\Inquiry;
 use App\Models\Item;
+use App\Support\Toast;
 use Illuminate\Http\RedirectResponse;
 
 class InquiryController extends Controller
@@ -31,6 +32,8 @@ class InquiryController extends Controller
             'received_at' => now(),
             'last_contact_at' => now(),
         ]);
+
+        Toast::success('Inquiry logged.');
 
         return back();
     }
@@ -58,6 +61,8 @@ class InquiryController extends Controller
         }
 
         $inquiry->update($changes);
+
+        Toast::success('Inquiry updated.');
 
         return back();
     }

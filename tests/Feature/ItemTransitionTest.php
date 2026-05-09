@@ -9,11 +9,18 @@ it('transitions an owned item along an allowed edge', function () {
     $user = User::factory()->create();
     $item = Item::factory()->create(['user_id' => $user->id]);
 
-    actingAs($user)
-        ->post("/items/{$item->id}/transition", ['to' => 'ready'])
-        ->assertRedirect();
+    $response = actingAs($user)
+        ->post("/items/{$item->id}/transition", ['to' => 'ready']);
+
+    $response->assertRedirect();
 
     expect($item->fresh()->status->value)->toBe('ready');
+
+    actingAs($user)->get("/items/{$item->id}")
+        ->assertInertia(fn ($page) => $page
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Item marked as ready.')
+        );
 });
 
 it('rejects invalid transitions', function () {

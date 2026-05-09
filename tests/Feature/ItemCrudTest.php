@@ -57,6 +57,12 @@ it('creates an item in draft status', function () {
     expect($item->status->value)->toBe('draft');
     expect($item->user_id)->toBe($user->id);
     $response->assertRedirect("/items/{$item->id}/edit");
+
+    actingAs($user)->get("/items/{$item->id}/edit")
+        ->assertInertia(fn ($page) => $page
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Item created.')
+        );
 });
 
 it('shows an item belonging to the auth user', function () {
@@ -99,16 +105,22 @@ it('updates an owned item', function () {
         'asking_price_cents' => 1000,
     ]);
 
-    actingAs($user)
+    $response = actingAs($user)
         ->patch("/items/{$item->id}", [
             'title' => 'New',
             'condition' => 'good',
             'asking_price_cents' => 2000,
-        ])
-        ->assertRedirect("/items/{$item->id}/edit");
+        ]);
 
     expect($item->fresh()->title)->toBe('New');
     expect($item->fresh()->asking_price_cents)->toBe(2000);
+    $response->assertRedirect("/items/{$item->id}/edit");
+
+    actingAs($user)->get("/items/{$item->id}/edit")
+        ->assertInertia(fn ($page) => $page
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Item updated.')
+        );
 });
 
 it('forbids editing another user\'s item', function () {
@@ -124,12 +136,17 @@ it('soft-deletes an owned item', function () {
     $user = User::factory()->create();
     $item = Item::factory()->create(['user_id' => $user->id]);
 
-    actingAs($user)
-        ->delete("/items/{$item->id}")
-        ->assertRedirect('/items');
+    $response = actingAs($user)->delete("/items/{$item->id}");
 
     expect(Item::find($item->id))->toBeNull();
     expect(Item::withTrashed()->find($item->id))->not->toBeNull();
+    $response->assertRedirect('/items');
+
+    actingAs($user)->get('/items')
+        ->assertInertia(fn ($page) => $page
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Item deleted.')
+        );
 });
 
 it('forbids deleting another user\'s item', function () {

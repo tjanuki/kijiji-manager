@@ -1,5 +1,8 @@
 import { Head, useForm } from '@inertiajs/react';
+import InputError from '@/components/input-error';
 import { PhotoUploader } from '@/components/photo-uploader';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 
 type Condition = { value: string; label: string };
 type Photo = { id: number; path: string; thumbnail_path: string | null; position: number; is_primary: boolean };
@@ -34,7 +37,9 @@ export default function ItemsEdit({ item, conditions }: { item: Item; conditions
             <Head title={`Edit ${item.title}`} />
             <form
                 className="max-w-xl p-6 space-y-4"
-                onSubmit={(e) => { e.preventDefault(); form.patch(`/items/${item.id}`); }}
+                onSubmit={(e) => {
+ e.preventDefault(); form.patch(`/items/${item.id}`); 
+}}
             >
                 <h1 className="text-2xl font-semibold">Edit item</h1>
 
@@ -42,9 +47,11 @@ export default function ItemsEdit({ item, conditions }: { item: Item; conditions
                     <span className="text-sm">Title</span>
                     <input
                         className="mt-1 w-full border rounded px-3 py-2"
+                        name="title"
                         value={form.data.title}
                         onChange={(e) => form.setData('title', e.target.value)}
                     />
+                    <InputError message={form.errors.title} className="mt-1" />
                 </label>
 
                 <label className="block">
@@ -55,6 +62,17 @@ export default function ItemsEdit({ item, conditions }: { item: Item; conditions
                         value={form.data.description}
                         onChange={(e) => form.setData('description', e.target.value)}
                     />
+                    <InputError message={form.errors.description} className="mt-1" />
+                </label>
+
+                <label className="block">
+                    <span className="text-sm">Category</span>
+                    <input
+                        className="mt-1 w-full border rounded px-3 py-2"
+                        value={form.data.category}
+                        onChange={(e) => form.setData('category', e.target.value)}
+                    />
+                    <InputError message={form.errors.category} className="mt-1" />
                 </label>
 
                 <label className="block">
@@ -68,6 +86,7 @@ export default function ItemsEdit({ item, conditions }: { item: Item; conditions
                             <option key={c.value} value={c.value}>{c.label}</option>
                         ))}
                     </select>
+                    <InputError message={form.errors.condition} className="mt-1" />
                 </label>
 
                 <label className="block">
@@ -78,6 +97,7 @@ export default function ItemsEdit({ item, conditions }: { item: Item; conditions
                         value={form.data.asking_price_cents}
                         onChange={(e) => form.setData('asking_price_cents', Number(e.target.value))}
                     />
+                    <InputError message={form.errors.asking_price_cents} className="mt-1" />
                 </label>
 
                 <label className="block">
@@ -88,6 +108,7 @@ export default function ItemsEdit({ item, conditions }: { item: Item; conditions
                         value={form.data.floor_price_cents}
                         onChange={(e) => form.setData('floor_price_cents', Number(e.target.value) || '')}
                     />
+                    <InputError message={form.errors.floor_price_cents} className="mt-1" />
                 </label>
 
                 <label className="block">
@@ -97,6 +118,7 @@ export default function ItemsEdit({ item, conditions }: { item: Item; conditions
                         value={form.data.location_in_house}
                         onChange={(e) => form.setData('location_in_house', e.target.value)}
                     />
+                    <InputError message={form.errors.location_in_house} className="mt-1" />
                 </label>
 
                 <label className="block">
@@ -107,6 +129,7 @@ export default function ItemsEdit({ item, conditions }: { item: Item; conditions
                         value={form.data.notes}
                         onChange={(e) => form.setData('notes', e.target.value)}
                     />
+                    <InputError message={form.errors.notes} className="mt-1" />
                 </label>
 
                 <section className="border-t pt-4">
@@ -114,13 +137,10 @@ export default function ItemsEdit({ item, conditions }: { item: Item; conditions
                     <PhotoUploader itemId={item.id} photos={item.photos} />
                 </section>
 
-                <button
-                    type="submit"
-                    className="bg-black text-white px-4 py-2 rounded"
-                    disabled={form.processing}
-                >
+                <Button type="submit" disabled={form.processing}>
+                    {form.processing && <Spinner className="mr-2 size-4" />}
                     Save
-                </button>
+                </Button>
             </form>
         </>
     );

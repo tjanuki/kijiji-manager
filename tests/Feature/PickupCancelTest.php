@@ -29,6 +29,20 @@ it('cancels a pickup and returns items to listed', function () {
     $fresh = $item->fresh();
     expect($fresh->status)->toBe(ItemStatus::Listed);
     expect($fresh->listed_at->equalTo($originalListedAt))->toBeTrue();
+
+    $itemB = Item::factory()->listed()->create(['user_id' => $user->id]);
+    $secondPickup = app(SchedulePickup::class)->handle(
+        buyer: $buyer,
+        items: [['item_id' => $itemB->id, 'agreed_price_cents' => 1000]],
+    );
+    \Pest\Laravel\actingAs($user)
+        ->post("/pickups/{$secondPickup->id}/cancel", ['to' => 'cancelled'])
+        ->assertRedirect();
+    \Pest\Laravel\actingAs($user)->get("/pickups/{$secondPickup->id}")
+        ->assertInertia(fn ($page) => $page
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Pickup cancelled.')
+        );
 });
 
 it('marks no_show and still returns items to listed', function () {

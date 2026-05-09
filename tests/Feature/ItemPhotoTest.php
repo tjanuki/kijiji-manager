@@ -28,6 +28,12 @@ it('stores a photo and generates a thumbnail', function () {
     expect($photo->thumbnail_path)->not->toBeNull();
     Storage::disk('public')->assertExists($photo->path);
     Storage::disk('public')->assertExists($photo->thumbnail_path);
+
+    actingAs($user)->get("/items/{$item->id}/edit")
+        ->assertInertia(fn ($page) => $page
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Photo uploaded.')
+        );
 });
 
 it('does not mark subsequent photos as primary', function () {
@@ -71,6 +77,12 @@ it('deletes a photo and reassigns primary', function () {
     expect(ItemPhoto::find($a->id))->toBeNull();
     Storage::disk('public')->assertMissing('items/x/a.jpg');
     expect($b->fresh()->is_primary)->toBeTrue();
+
+    actingAs($user)->get("/items/{$item->id}/edit")
+        ->assertInertia(fn ($page) => $page
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Photo removed.')
+        );
 });
 
 it('forbids deleting another user\'s photo', function () {

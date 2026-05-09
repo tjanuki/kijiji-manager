@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { InquiryForm } from '@/components/inquiry-form';
 import { InquiryTimeline } from '@/components/inquiry-timeline';
 import { StatusPill } from '@/components/status-pill';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 
 type Photo = { id: number; thumbnail_path: string | null; path: string };
 type Item = {
@@ -23,6 +25,7 @@ const COPIED_FEEDBACK_MS = 1500;
 
 function CopyButton({ text, label }: { text: string; label: string }) {
     const [state, setState] = useState<'idle' | 'copied' | 'error'>('idle');
+
     return (
         <button
             type="button"
@@ -31,11 +34,13 @@ function CopyButton({ text, label }: { text: string; label: string }) {
                     if (!navigator.clipboard) {
                         throw new Error('Clipboard API unavailable');
                     }
+
                     await navigator.clipboard.writeText(text);
                     setState('copied');
                 } catch {
                     setState('error');
                 }
+
                 setTimeout(() => setState('idle'), COPIED_FEEDBACK_MS);
             }}
             aria-live="polite"
@@ -55,6 +60,7 @@ function SchedulePickupForm({
     buyers: Buyer[];
     askingPriceCents: number;
 }) {
+    const [pending, setPending] = useState(false);
     const form = useForm<{
         buyer_id: number | null;
         notes: string;
@@ -75,6 +81,7 @@ function SchedulePickupForm({
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
+        setPending(true);
         const price = form.data.agreed_price_cents === '' ? 0 : Number(form.data.agreed_price_cents);
         router.post(
             '/pickups',
@@ -83,7 +90,10 @@ function SchedulePickupForm({
                 notes: form.data.notes || null,
                 items: [{ item_id: itemId, agreed_price_cents: price }],
             },
-            { preserveScroll: true },
+            {
+                preserveScroll: true,
+                onFinish: () => setPending(false),
+            },
         );
     };
 
@@ -120,9 +130,10 @@ function SchedulePickupForm({
                 rows={2}
                 className="w-full border rounded px-2 py-1 text-sm"
             />
-            <button type="submit" className="bg-black text-white px-3 py-1.5 rounded text-sm">
-                Schedule
-            </button>
+            <Button type="submit" disabled={pending}>
+                {pending && <Spinner className="mr-2 size-4" />}
+                Schedule pickup
+            </Button>
         </form>
     );
 }
@@ -131,13 +142,16 @@ function TransitionControls({ item }: { item: Item }) {
     const [kijijiUrl, setKijijiUrl] = useState('');
     const [error, setError] = useState<string | null>(null);
 
+    const [pending, setPending] = useState(false);
     const post = (data: Record<string, string>) => {
         setError(null);
+        setPending(true);
         router.post(`/items/${item.id}/transition`, data, {
             preserveScroll: true,
             onError: (errs) => {
                 setError(errs.kijiji_url ?? errs.to ?? 'Could not update status.');
             },
+            onFinish: () => setPending(false),
         });
     };
 
@@ -152,8 +166,10 @@ function TransitionControls({ item }: { item: Item }) {
                 <button
                     type="button"
                     onClick={() => post({ to: 'ready' })}
-                    className="bg-black text-white px-4 py-2 rounded text-sm"
+                    disabled={pending}
+                    className="bg-black text-white px-4 py-2 rounded text-sm disabled:opacity-50 inline-flex items-center"
                 >
+                    {pending && <Spinner className="mr-2 size-4" />}
                     Mark as ready
                 </button>
             </div>
@@ -187,9 +203,10 @@ function TransitionControls({ item }: { item: Item }) {
                 {error && <p className="text-sm text-rose-700">{error}</p>}
                 <button
                     type="submit"
-                    disabled={!kijijiUrl.trim()}
-                    className="bg-black text-white px-4 py-2 rounded text-sm disabled:opacity-50"
+                    disabled={pending || !kijijiUrl.trim()}
+                    className="bg-black text-white px-4 py-2 rounded text-sm disabled:opacity-50 inline-flex items-center"
                 >
+                    {pending && <Spinner className="mr-2 size-4" />}
                     Mark as published
                 </button>
             </form>
@@ -204,8 +221,10 @@ function TransitionControls({ item }: { item: Item }) {
                 <button
                     type="button"
                     onClick={() => post({ to: 'draft' })}
-                    className="bg-black text-white px-4 py-2 rounded text-sm"
+                    disabled={pending}
+                    className="bg-black text-white px-4 py-2 rounded text-sm disabled:opacity-50 inline-flex items-center"
                 >
+                    {pending && <Spinner className="mr-2 size-4" />}
                     Move back to draft
                 </button>
             </div>
@@ -219,8 +238,10 @@ function TransitionControls({ item }: { item: Item }) {
             <button
                 type="button"
                 onClick={() => post({ to: 'withdrawn' })}
-                className="text-sm text-rose-700 underline"
+                disabled={pending}
+                className="text-sm text-rose-700 underline disabled:opacity-50 inline-flex items-center"
             >
+                {pending && <Spinner className="mr-2 size-4" />}
                 Withdraw this item
             </button>
         </div>

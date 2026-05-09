@@ -35,6 +35,13 @@ it('creates a buyer scoped to the current user', function () {
         ->assertRedirect();
 
     expect(Buyer::query()->where('user_id', $user->id)->where('display_name', 'Sam')->exists())->toBeTrue();
+
+    $buyer = Buyer::latest()->first();
+    actingAs($user)->get("/buyers/{$buyer->id}")
+        ->assertInertia(fn ($page) => $page
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Buyer added.')
+        );
 });
 
 it('shows a buyer with their inquiries', function () {
@@ -69,6 +76,12 @@ it('updates a buyer', function () {
         ->assertRedirect();
 
     expect($buyer->fresh()->display_name)->toBe('New');
+
+    actingAs($user)->get("/buyers/{$buyer->id}")
+        ->assertInertia(fn ($page) => $page
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Buyer updated.')
+        );
 });
 
 it('forbids updating another user buyer', function () {

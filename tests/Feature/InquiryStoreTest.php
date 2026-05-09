@@ -29,6 +29,12 @@ it('creates an inquiry against an existing buyer', function () {
     expect($inquiry->offered_price_cents)->toBe(4000);
     expect($inquiry->status)->toBe(InquiryStatus::New);
     expect($inquiry->received_at)->not->toBeNull();
+
+    actingAs($user)->get("/items/{$item->id}")
+        ->assertInertia(fn ($page) => $page
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Inquiry logged.')
+        );
 });
 
 it('quick-creates a buyer when display_name is provided without buyer_id', function () {

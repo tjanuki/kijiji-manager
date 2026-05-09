@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { Spinner } from '@/components/ui/spinner';
 
 type Photo = {
     id: number;
@@ -11,17 +12,28 @@ type Photo = {
 
 export function PhotoUploader({ itemId, photos }: { itemId: number; photos: Photo[] }) {
     const inputRef = useRef<HTMLInputElement>(null);
+    const [uploading, setUploading] = useState(false);
+    const [removingId, setRemovingId] = useState<number | null>(null);
 
     const upload = (file: File) => {
+        setUploading(true);
         router.post(
             `/items/${itemId}/photos`,
             { photo: file },
-            { forceFormData: true, preserveScroll: true }
+            {
+                forceFormData: true,
+                preserveScroll: true,
+                onFinish: () => setUploading(false),
+            }
         );
     };
 
     const remove = (photoId: number) => {
-        router.delete(`/items/${itemId}/photos/${photoId}`, { preserveScroll: true });
+        setRemovingId(photoId);
+        router.delete(`/items/${itemId}/photos/${photoId}`, {
+            preserveScroll: true,
+            onFinish: () => setRemovingId(null),
+        });
     };
 
     return (
@@ -42,9 +54,10 @@ export function PhotoUploader({ itemId, photos }: { itemId: number; photos: Phot
                         <button
                             type="button"
                             onClick={() => remove(p.id)}
-                            className="absolute top-1 right-1 bg-white/90 text-xs px-1.5 py-0.5 rounded"
+                            disabled={removingId === p.id}
+                            className="absolute top-1 right-1 bg-white/90 text-xs px-1.5 py-0.5 rounded inline-flex items-center"
                         >
-                            Remove
+                            {removingId === p.id ? <Spinner className="size-3" /> : 'Remove'}
                         </button>
                     </div>
                 ))}
@@ -57,16 +70,23 @@ export function PhotoUploader({ itemId, photos }: { itemId: number; photos: Phot
                 className="hidden"
                 onChange={(e) => {
                     const file = e.target.files?.[0];
-                    if (file) upload(file);
+
+                    if (file) {
+upload(file);
+}
+
                     e.target.value = '';
                 }}
             />
             <button
                 type="button"
                 onClick={() => inputRef.current?.click()}
+                disabled={uploading}
                 className="border border-dashed rounded px-3 py-2 text-sm w-full"
             >
-                Add photo
+                {uploading
+                    ? <span className="inline-flex items-center gap-2"><Spinner className="size-4" /> Uploading…</span>
+                    : 'Add photo'}
             </button>
         </div>
     );

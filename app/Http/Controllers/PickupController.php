@@ -11,6 +11,7 @@ use App\Http\Requests\StorePickupRequest;
 use App\Http\Requests\UpdatePickupRequest;
 use App\Models\Buyer;
 use App\Models\Pickup;
+use App\Support\Toast;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -63,12 +64,16 @@ class PickupController extends Controller
             throw ValidationException::withMessages(['items' => $e->getMessage()]);
         }
 
+        Toast::success('Pickup scheduled.');
+
         return redirect("/pickups/{$pickup->id}");
     }
 
     public function update(UpdatePickupRequest $request, Pickup $pickup): RedirectResponse
     {
         $pickup->update($request->validated());
+
+        Toast::success('Pickup updated.');
 
         return back();
     }
@@ -87,6 +92,8 @@ class PickupController extends Controller
             throw ValidationException::withMessages(['payment_method' => $e->getMessage()]);
         }
 
+        Toast::success('Pickup marked complete.');
+
         return back();
     }
 
@@ -103,6 +110,8 @@ class PickupController extends Controller
         } catch (\InvalidArgumentException $e) {
             throw ValidationException::withMessages(['to' => $e->getMessage()]);
         }
+
+        Toast::success('Pickup cancelled.');
 
         return back();
     }

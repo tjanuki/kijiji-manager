@@ -31,6 +31,12 @@ it('updates status, offered price, and last_contact_at', function () {
     expect($fresh->status)->toBe(InquiryStatus::Negotiating);
     expect($fresh->offered_price_cents)->toBe(5500);
     expect($fresh->last_contact_at->greaterThan($before))->toBeTrue();
+
+    actingAs($user)->get("/items/{$item->id}")
+        ->assertInertia(fn ($page) => $page
+            ->hasFlash('toast.type', 'success')
+            ->hasFlash('toast.message', 'Inquiry updated.')
+        );
 });
 
 it('appends a negotiation note to the log when provided', function () {

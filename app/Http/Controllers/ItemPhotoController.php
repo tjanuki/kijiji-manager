@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use App\Models\ItemPhoto;
+use App\Support\Toast;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -33,6 +34,8 @@ class ItemPhotoController extends Controller
             'position' => $isFirst ? 0 : $position + 1,
             'is_primary' => $isFirst,
         ]);
+
+        Toast::success('Photo uploaded.');
 
         return back();
     }
@@ -72,6 +75,8 @@ class ItemPhotoController extends Controller
             $next = $item->photos()->orderBy('position')->first();
             $next?->update(['is_primary' => true]);
         }
+
+        Toast::success('Photo removed.');
 
         return back();
     }

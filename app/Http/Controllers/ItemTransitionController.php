@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ItemStatus;
 use App\Models\Item;
 use App\Services\ItemStatusManager;
+use App\Support\Toast;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -32,6 +33,15 @@ class ItemTransitionController extends Controller
             $field = str_contains($e->getMessage(), 'kijiji_url') ? 'kijiji_url' : 'to';
             throw ValidationException::withMessages([$field => $e->getMessage()]);
         }
+
+        Toast::success(match ($to) {
+            ItemStatus::Draft => 'Item moved to draft.',
+            ItemStatus::Ready => 'Item marked as ready.',
+            ItemStatus::Listed => 'Item marked as listed.',
+            ItemStatus::Reserved => 'Item marked as reserved.',
+            ItemStatus::Sold => 'Item marked as sold.',
+            ItemStatus::Withdrawn => 'Item withdrawn.',
+        });
 
         return back();
     }

@@ -46,9 +46,14 @@ function CopyButton({ text, label }: { text: string; label: string }) {
 
 function InquiryRow({ inquiry, replyTemplates }: { inquiry: Inquiry; replyTemplates: ReplyTemplate[] }) {
     const [note, setNote] = useState('');
+    const [pending, setPending] = useState(false);
 
     const update = (changes: Record<string, string | number | null>) => {
-        router.patch(`/inquiries/${inquiry.id}`, changes, { preserveScroll: true });
+        setPending(true);
+        router.patch(`/inquiries/${inquiry.id}`, changes, {
+            preserveScroll: true,
+            onFinish: () => setPending(false),
+        });
     };
 
     return (
@@ -65,6 +70,7 @@ function InquiryRow({ inquiry, replyTemplates }: { inquiry: Inquiry; replyTempla
                 <select
                     value={inquiry.status}
                     onChange={(e) => update({ status: e.target.value })}
+                    disabled={pending}
                     className="text-xs border rounded px-2 py-1"
                 >
                     {STATUSES.map((s) => (
@@ -85,6 +91,7 @@ function InquiryRow({ inquiry, replyTemplates }: { inquiry: Inquiry; replyTempla
                     type="number"
                     defaultValue={inquiry.offered_price_cents ?? ''}
                     placeholder="cents"
+                    disabled={pending}
                     className="border rounded px-2 py-1 w-24"
                     onBlur={(e) => {
                         const v = e.target.value === '' ? null : Number(e.target.value);
@@ -125,7 +132,9 @@ function InquiryRow({ inquiry, replyTemplates }: { inquiry: Inquiry; replyTempla
                     placeholder="Counter-offer note"
                     className="flex-1 border rounded px-2 py-1 text-xs"
                 />
-                <button type="submit" className="text-xs border rounded px-2 py-1">Log</button>
+                <button type="submit" disabled={pending} className="text-xs border rounded px-2 py-1">
+                    {pending ? 'Saving…' : 'Log'}
+                </button>
             </form>
 
             {replyTemplates.length > 0 && (
