@@ -16,6 +16,7 @@ it('updates status, offered price, and last_contact_at', function () {
         'item_id' => $item->id,
         'buyer_id' => $buyer->id,
         'status' => InquiryStatus::New->value,
+        'last_contact_at' => now()->subHour(),
     ]);
 
     $before = $inquiry->last_contact_at;
