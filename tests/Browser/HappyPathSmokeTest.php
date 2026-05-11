@@ -38,9 +38,11 @@ it('walks the full sale lifecycle without JavaScript errors', function () {
     // The Pest browser plugin can't forward multipart uploads through to Laravel
     // (LaravelHttpServer.php:257 — files aren't wired up), so we attach a photo
     // directly via the factory to satisfy the "≥1 photo" condition for ready.
+    $photoPath = 'items/'.$item->id.'/smoke.jpg';
+    Storage::disk('public')->put($photoPath, 'fake-jpeg-bytes');
     ItemPhoto::factory()->primary()->create([
         'item_id' => $item->id,
-        'path' => 'items/'.$item->id.'/smoke.jpg',
+        'path' => $photoPath,
     ]);
 
     $page->navigate("/items/{$item->id}")

@@ -99,7 +99,7 @@ function SchedulePickupForm({
 
     return (
         <form onSubmit={submit} className="border rounded-lg p-4 space-y-3">
-            <h2 className="font-medium">Schedule pickup</h2>
+            <h2 className="font-medium">Schedule a pickup</h2>
             <select
                 name="buyer_id"
                 value={form.data.buyer_id ?? ''}
